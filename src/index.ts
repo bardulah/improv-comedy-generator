@@ -1,65 +1,45 @@
 #!/usr/bin/env node
 
+import chalk from 'chalk';
 import { ScenePromptGenerator } from './generators/scenePrompt.js';
 import { CharacterGenerator } from './generators/character.js';
 import { ScenarioGenerator } from './generators/scenario.js';
 import { generateComeback, generatePunchlineFor } from './generators/comeback.js';
-import { parseArgs } from './cli-parser.js';
+import { parseArgs, ParsedArgs } from './cli-parser.js';
 import { Exporter } from './exporter.js';
 import { runInteractiveMode } from './interactive.js';
 import { CombinationGenerator } from './combination.js';
 import { getHistory, clearHistory } from './utils.js';
 import { loadConfig } from './config.js';
+import { printBanner, printSection, printSuccess, printError, printInfo } from './formatter.js';
 
-// Colors for terminal output
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  cyan: '\x1b[36m',
-  yellow: '\x1b[33m',
-  green: '\x1b[32m',
-  magenta: '\x1b[35m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m'
-};
-
-function printBanner() {
-  console.log(`${colors.bright}${colors.cyan}
-╔═══════════════════════════════════════════════════╗
-║      🎭 IMPROV COMEDY GENERATOR 🎭                ║
-║   Generate absurd scenes & hilarious scenarios!  ║
-╚═══════════════════════════════════════════════════╝
-${colors.reset}`);
-}
-
-function printHelp() {
-  console.log(`${colors.bright}Usage:${colors.reset}
+function printHelp(): void {
+  console.log(`${chalk.bold('Usage:')}
   improv [command] [options]
 
-${colors.bright}Commands:${colors.reset}
-  ${colors.green}scene${colors.reset}              Generate an absurd scene prompt
-  ${colors.green}character${colors.reset}          Generate a quirky character description
-  ${colors.green}scenario${colors.reset}           Generate a full comedic scenario
-  ${colors.green}comeback [setup]${colors.reset}   Generate a comeback line (optional setup)
-  ${colors.green}punchline <setup>${colors.reset}  Generate a punchline for your setup
-  ${colors.green}combo${colors.reset}              Generate a combination (scene + characters)
-  ${colors.green}random${colors.reset}             Generate a random comedy element
-  ${colors.green}all${colors.reset}                Generate everything at once
-  ${colors.green}history${colors.reset}            Show generation history
-  ${colors.green}help${colors.reset}               Show this help message
+${chalk.bold('Commands:')}
+  ${chalk.green('scene')}              Generate an absurd scene prompt
+  ${chalk.green('character')}          Generate a quirky character description
+  ${chalk.green('scenario')}           Generate a full comedic scenario
+  ${chalk.green('comeback [setup]')}   Generate a comeback line (optional setup)
+  ${chalk.green('punchline <setup>')}  Generate a punchline for your setup
+  ${chalk.green('combo')}              Generate a combination (scene + characters)
+  ${chalk.green('random')}             Generate a random comedy element
+  ${chalk.green('all')}                Generate everything at once
+  ${chalk.green('history')}            Show generation history
+  ${chalk.green('help')}               Show this help message
 
-${colors.bright}Options:${colors.reset}
-  ${colors.cyan}--count, -c <n>${colors.reset}     Generate multiple items
-  ${colors.cyan}--no-repeat${colors.reset}         Avoid recently used items
-  ${colors.cyan}--save, -s <file>${colors.reset}   Save output to file
-  ${colors.cyan}--json, -j${colors.reset}          Output as JSON
-  ${colors.cyan}--minimal${colors.reset}           Minimal text output
-  ${colors.cyan}--interactive, -i${colors.reset}   Interactive mode
-  ${colors.cyan}--theme <name>${colors.reset}      Filter by theme
-  ${colors.cyan}--clear-history${colors.reset}     Clear generation history
+${chalk.bold('Options:')}
+  ${chalk.cyan('--count, -c <n>')}     Generate multiple items (1-100)
+  ${chalk.cyan('--no-repeat')}         Avoid recently used items
+  ${chalk.cyan('--save, -s <file>')}   Save output to file
+  ${chalk.cyan('--json, -j')}          Output as JSON
+  ${chalk.cyan('--minimal')}           Minimal text output
+  ${chalk.cyan('--interactive, -i')}   Interactive mode
+  ${chalk.cyan('--theme <name>')}      Filter by theme
+  ${chalk.cyan('--clear-history')}     Clear generation history
 
-${colors.bright}Examples:${colors.reset}
+${chalk.bold('Examples:')}
   improv scene --count 3
   improv character --no-repeat
   improv combo
@@ -70,27 +50,21 @@ ${colors.bright}Examples:${colors.reset}
 `);
 }
 
-function printSection(title: string, content: string, color: string = colors.yellow) {
-  console.log(`\n${colors.bright}${color}═══ ${title} ═══${colors.reset}\n`);
-  console.log(content);
-  console.log();
-}
-
-async function handleSceneCommand(parsed: any) {
+async function handleSceneCommand(parsed: ParsedArgs): Promise<void> {
   const generator = new ScenePromptGenerator();
   const count = parsed.options.count || 1;
 
   if (count > 1) {
-    console.log(`${colors.cyan}Generating ${count} scene prompts...${colors.reset}\n`);
+    printInfo(`Generating ${count} scene prompts...\n`);
   }
 
   const results = [];
   for (let i = 0; i < count; i++) {
     const result = generator.generateWithHistory(parsed.options);
     if (count > 1) {
-      printSection(`🎬 SCENE ${i + 1}`, result.formatted, colors.cyan);
+      printSection(`🎬 SCENE ${i + 1}`, result.formatted, chalk.cyan);
     } else {
-      printSection('🎬 SCENE PROMPT', result.formatted, colors.cyan);
+      printSection('🎬 SCENE PROMPT', result.formatted, chalk.cyan);
     }
     results.push(result);
   }
@@ -100,21 +74,21 @@ async function handleSceneCommand(parsed: any) {
   }
 }
 
-async function handleCharacterCommand(parsed: any) {
+async function handleCharacterCommand(parsed: ParsedArgs): Promise<void> {
   const generator = new CharacterGenerator();
   const count = parsed.options.count || 1;
 
   if (count > 1) {
-    console.log(`${colors.magenta}Generating ${count} characters...${colors.reset}\n`);
+    console.log(chalk.magenta(`Generating ${count} characters...\n`));
   }
 
   const results = [];
   for (let i = 0; i < count; i++) {
     const result = generator.generateWithHistory(parsed.options);
     if (count > 1) {
-      printSection(`🎭 CHARACTER ${i + 1}`, result.formatted, colors.magenta);
+      printSection(`🎭 CHARACTER ${i + 1}`, result.formatted, chalk.magenta);
     } else {
-      printSection('🎭 CHARACTER', result.formatted, colors.magenta);
+      printSection('🎭 CHARACTER', result.formatted, chalk.magenta);
     }
     results.push(result);
   }
@@ -124,21 +98,21 @@ async function handleCharacterCommand(parsed: any) {
   }
 }
 
-async function handleScenarioCommand(parsed: any) {
+async function handleScenarioCommand(parsed: ParsedArgs): Promise<void> {
   const generator = new ScenarioGenerator();
   const count = parsed.options.count || 1;
 
   if (count > 1) {
-    console.log(`${colors.yellow}Generating ${count} scenarios...${colors.reset}\n`);
+    console.log(chalk.yellow(`Generating ${count} scenarios...\n`));
   }
 
   const results = [];
   for (let i = 0; i < count; i++) {
     const result = generator.generateWithHistory(parsed.options);
     if (count > 1) {
-      printSection(`📖 SCENARIO ${i + 1}`, result.formatted, colors.yellow);
+      printSection(`📖 SCENARIO ${i + 1}`, result.formatted, chalk.yellow);
     } else {
-      printSection('📖 SCENARIO', result.formatted, colors.yellow);
+      printSection('📖 SCENARIO', result.formatted, chalk.yellow);
     }
     results.push(result);
   }
@@ -148,38 +122,38 @@ async function handleScenarioCommand(parsed: any) {
   }
 }
 
-async function handleComebackCommand(parsed: any, setup?: string) {
+async function handleComebackCommand(parsed: ParsedArgs, setup?: string): Promise<void> {
   const comeback = generateComeback(setup);
   if (setup) {
-    printSection('💬 SETUP', `"${setup}"`, colors.green);
+    printSection('💬 SETUP', `"${setup}"`, chalk.green);
   }
-  printSection('🔥 COMEBACK', comeback, colors.red);
+  printSection('🔥 COMEBACK', comeback, chalk.red);
 
   if (parsed.exportOptions) {
     Exporter.export({ setup, comeback, formatted: comeback }, parsed.exportOptions);
   }
 }
 
-async function handlePunchlineCommand(parsed: any, setup: string) {
+async function handlePunchlineCommand(parsed: ParsedArgs, setup: string): Promise<void> {
   if (!setup) {
-    console.log(`${colors.red}Error: Please provide a setup for the punchline${colors.reset}`);
+    printError('Please provide a setup for the punchline');
     console.log(`Example: improv punchline "Why did the chicken cross the road?"`);
     return;
   }
   const punchline = generatePunchlineFor(setup);
-  printSection('💬 SETUP', `"${setup}"`, colors.green);
-  printSection('🎯 PUNCHLINE', punchline, colors.yellow);
+  printSection('💬 SETUP', `"${setup}"`, chalk.green);
+  printSection('🎯 PUNCHLINE', punchline, chalk.yellow);
 
   if (parsed.exportOptions) {
     Exporter.export({ setup, punchline, formatted: `Setup: ${setup}\n\nPunchline: ${punchline}` }, parsed.exportOptions);
   }
 }
 
-async function handleComboCommand(parsed: any) {
+async function handleComboCommand(parsed: ParsedArgs): Promise<void> {
   const combo = new CombinationGenerator();
   const numChars = parsed.options.count || 2;
 
-  console.log(`${colors.cyan}Generating complete improv setup with ${numChars} characters...${colors.reset}\n`);
+  printInfo(`Generating complete improv setup with ${numChars} characters...\n`);
 
   const result = combo.generateComplete(numChars, parsed.options);
   console.log(result.formatted);
@@ -189,42 +163,42 @@ async function handleComboCommand(parsed: any) {
   }
 }
 
-async function handleRandomCommand(parsed: any) {
+async function handleRandomCommand(parsed: ParsedArgs): Promise<void> {
   const generators = [
     { name: 'scene', fn: handleSceneCommand },
     { name: 'character', fn: handleCharacterCommand },
     { name: 'scenario', fn: handleScenarioCommand },
-    { name: 'comeback', fn: (p: any) => handleComebackCommand(p) }
+    { name: 'comeback', fn: (p: ParsedArgs) => handleComebackCommand(p) }
   ];
 
   const random = generators[Math.floor(Math.random() * generators.length)];
-  console.log(`${colors.bright}${colors.cyan}✨ Random generator: ${random.name}${colors.reset}\n`);
+  console.log(chalk.bold.cyan(`✨ Random generator: ${random.name}\n`));
   await random.fn(parsed);
 }
 
-async function handleAllCommand(parsed: any) {
+async function handleAllCommand(parsed: ParsedArgs): Promise<void> {
   await handleSceneCommand(parsed);
   await handleCharacterCommand({ ...parsed, options: { ...parsed.options, count: 2 } });
   await handleScenarioCommand(parsed);
   await handleComebackCommand(parsed);
 }
 
-async function handleHistoryCommand() {
+async function handleHistoryCommand(): Promise<void> {
   const history = getHistory();
 
   if (history.length === 0) {
-    console.log(`${colors.yellow}No history yet. Start generating some comedy!${colors.reset}`);
+    console.log(chalk.yellow('No history yet. Start generating some comedy!'));
     return;
   }
 
-  printSection('📜 GENERATION HISTORY', '', colors.blue);
+  printSection('📜 GENERATION HISTORY', '', chalk.blue);
   history.slice(-10).forEach((entry, i) => {
-    console.log(`${colors.dim}${i + 1}. [${entry.type}] ${entry.timestamp.toLocaleTimeString()}${colors.reset}`);
+    console.log(chalk.dim(`${i + 1}. [${entry.type}] ${entry.timestamp.toLocaleTimeString()}`));
     console.log(`   ${entry.content.substring(0, 100)}${entry.content.length > 100 ? '...' : ''}\n`);
   });
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const parsed = parseArgs(process.argv);
 
@@ -234,7 +208,7 @@ async function main() {
     // Handle special flags
     if (parsed.flags.clearHistory) {
       clearHistory();
-      console.log(`${colors.green}✓ History cleared${colors.reset}`);
+      printSuccess('History cleared');
       return;
     }
 
@@ -324,12 +298,14 @@ async function main() {
         break;
 
       default:
-        console.log(`${colors.red}Unknown command: ${parsed.command}${colors.reset}\n`);
+        printError(`Unknown command: ${parsed.command}`);
+        console.log();
         printHelp();
         break;
     }
-  } catch (error: any) {
-    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    printError(message);
     process.exit(1);
   }
 }
