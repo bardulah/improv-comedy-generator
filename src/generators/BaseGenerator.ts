@@ -12,25 +12,48 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export abstract class BaseGenerator<T> {
-  protected dataCache: Map<string, any[]> = new Map();
+  // Static cache shared across all instances for better performance
+  private static dataCache: Map<string, any[]> = new Map();
 
   /**
-   * Load data from JSON file
+   * Load data from JSON file with proper error handling
    */
   protected loadData(filename: string): any[] {
     // Check cache first
-    if (this.dataCache.has(filename)) {
-      return this.dataCache.get(filename)!;
+    if (BaseGenerator.dataCache.has(filename)) {
+      return BaseGenerator.dataCache.get(filename)!;
+    }
+
+    const filePath = path.join(__dirname, '..', 'data', filename);
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      throw new Error(
+        `Data file not found: ${filename}\n` +
+        `Expected location: ${filePath}\n` +
+        `Please ensure you've run 'npm run build' to compile the project.`
+      );
     }
 
     try {
-      const filePath = path.join(__dirname, '..', 'data', filename);
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      this.dataCache.set(filename, data);
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(fileContent);
+
+      if (!Array.isArray(data)) {
+        throw new Error(`Data file ${filename} must contain an array`);
+      }
+
+      if (data.length === 0) {
+        throw new Error(`Data file ${filename} is empty`);
+      }
+
+      BaseGenerator.dataCache.set(filename, data);
       return data;
     } catch (error) {
-      console.error(`Error loading ${filename}:`, error);
-      return [];
+      if (error instanceof SyntaxError) {
+        throw new Error(`Invalid JSON in ${filename}: ${error.message}`);
+      }
+      throw error;
     }
   }
 
