@@ -4,11 +4,22 @@ AI-powered improv comedy generator: creates absurd scenes, quirky characters, an
 
 ## ✨ Features
 
+### Core Generators
 - **Scene Prompts**: Generate absurd scene prompts with random locations, situations, and objectives
 - **Character Generator**: Create quirky characters with unique professions, personalities, and secrets
 - **Scenario Builder**: Generate full comedic scenarios with plot twists and complications
 - **Comeback Generator**: Get witty comebacks and roasts (with optional user-provided setups)
 - **Punchline Generator**: Create punchlines for your joke setups
+- **Combination Generator**: Mix scenes, characters, and scenarios for complete improv setups
+
+### Advanced Features
+- 🔄 **No-Repeat Mode**: Avoid recently used content for fresher results
+- 📊 **Batch Generation**: Generate multiple items at once with `--count`
+- 💾 **Export Options**: Save to file, output as JSON or minimal text
+- 🎮 **Interactive Mode**: Step-by-step guided comedy generation
+- 📜 **History Tracking**: Review your generation history
+- ⚙️ **Configuration File**: Customize defaults via `.improvrc`
+- 🎨 **Modular Architecture**: Data separated from logic for easy customization
 
 ## 🚀 Installation
 
@@ -26,128 +37,200 @@ npm run build
 
 ## 📖 Usage
 
-### Run with npm (development)
+### Basic Commands
 
 ```bash
 npm run dev [command] [options]
 ```
 
-### Run the built version
+#### Available Commands
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `scene` | `s` | Generate an absurd scene prompt |
+| `character` | `char`, `c` | Generate a quirky character |
+| `scenario` | `sc` | Generate a full scenario |
+| `comeback [setup]` | `cb` | Generate a comeback line |
+| `punchline <setup>` | `punch`, `p` | Generate a punchline |
+| `combo` | - | Generate scene + characters + scenario |
+| `random` | `r` | Generate random element |
+| `all` | `a` | Generate everything at once |
+| `history` | `hist` | Show generation history |
+| `help` | `h` | Show help message |
+
+### Options & Flags
+
+| Option | Alias | Description |
+|--------|-------|-------------|
+| `--count <n>` | `-c` | Generate multiple items |
+| `--no-repeat` | - | Avoid recently used items |
+| `--save <file>` | `-s` | Save output to file |
+| `--json` | `-j` | Output as JSON |
+| `--minimal` | - | Minimal text output |
+| `--interactive` | `-i` | Start interactive mode |
+| `--theme <name>` | - | Filter by theme (future) |
+| `--clear-history` | - | Clear generation history |
+
+## 📚 Examples
+
+### Basic Usage
 
 ```bash
-npm start [command]
-# or
-node dist/index.js [command]
-```
-
-### Commands
-
-#### Generate a Scene Prompt
-
-```bash
+# Generate a single scene
 npm run dev scene
+
+# Generate multiple characters
+npm run dev character -- --count 3
+
+# Generate with no-repeat mode
+npm run dev scenario -- --no-repeat
 ```
 
-Example output:
+### Combination Generator
+
+```bash
+# Generate complete improv setup (scene + 2 characters + scenario)
+npm run dev combo
+
+# Generate with custom character count
+npm run dev combo -- --count 4
+```
+
+### Export Features
+
+```bash
+# Save scene to file
+npm run dev scene -- --save my-scene.txt
+
+# Export as JSON
+npm run dev character -- --json --save character.json
+
+# Minimal output (no formatting)
+npm run dev scenario -- --minimal
+```
+
+### Interactive Mode
+
+```bash
+# Start interactive mode
+npm run dev -- --interactive
+
+# Or use the flag
+npm run dev -- -i
+```
+
+Interactive mode guides you through:
+1. Choosing what to generate
+2. Setting options like no-repeat
+3. Generating multiple items
+4. Saving to files
+
+### History Management
+
+```bash
+# View recent generations
+npm run dev history
+
+# Clear history
+npm run dev -- --clear-history
+```
+
+### Example Outputs
+
+#### Scene Prompt
 ```
 ═══ 🎬 SCENE PROMPT ═══
 
-You are in a karaoke bar in space, learning that you're being narrated by
-an unreliable narrator. Your goal is to break a world record.
+You are in a cheese factory, learning that objects keep disappearing
+when no one looks at them. Your goal is to audition for a talent show.
 ```
 
-#### Generate a Character
-
-```bash
-npm run dev character
-```
-
-Example output:
+#### Character
 ```
 ═══ 🎭 CHARACTER ═══
 
-You are a ninja accountant. You are unnecessarily mysterious and is allergic
-to common sense. Secret: They're from the future but terrible at hiding it
+You are a professional bubble wrap popper. You are overly dramatic
+and can only speak in movie quotes. Secret: They're actually three
+kids in a trench coat
 ```
 
-#### Generate a Full Scenario
-
-```bash
-npm run dev scenario
+#### Combo Generator
 ```
+🎬 SCENE
+==================================================
+You are in the moon, finding out you're all secretly the same person.
+Your goal is to order lunch.
 
-Example output:
-```
-═══ 📖 SCENARIO ═══
+🎭 CHARACTERS
+==================================================
+Character 1: You are a fortune cookie writer. You are suspiciously
+optimistic and forgets their own name constantly. Secret: They're
+secretly terrified of their own success
 
-In a shocking turn of events, a paranoid librarian accidentally became
-famous for the wrong reason, but they were terrible at keeping secrets
-a life coach who's terrible at their job.
+Character 2: You are a professional line-stander. You are overly
+dramatic and can only tell lies. Secret: They're convinced they're
+the chosen one (they're not)
 
-Plot twist: The instructions were upside down the whole time.
+📖 SCENARIO
+==================================================
+Everything changed when a billionaire tech CEO found out they had
+a superpower that only works on Tuesdays, while being chased by
+a ghost with terrible advice.
+
+Plot twist: Everything was cake. Literally everything.
 
 Now improvise this scene!
 ```
 
-#### Generate a Comeback
+## ⚙️ Configuration
 
-```bash
-# With a setup
-npm run dev comeback "You think you're so smart"
+Create a `.improvrc` file in your home directory to set defaults:
 
-# Without a setup (random comeback)
-npm run dev comeback
+```json
+{
+  "theme": "workplace",
+  "absurdity_level": 8,
+  "exclude_topics": [],
+  "favorite_generators": ["scene", "character"],
+  "color_theme": "default",
+  "history_enabled": true,
+  "max_history": 100
+}
 ```
 
-Example output:
+## 📁 Project Structure
+
 ```
-═══ 💬 SETUP ═══
-
-"You think you're so smart"
-
-═══ 🔥 COMEBACK ═══
-
-Oh really? Well my houseplant has better opinions!
+improv-comedy-generator/
+├── src/
+│   ├── index.ts                 # Main CLI interface
+│   ├── types.ts                 # TypeScript type definitions
+│   ├── utils.ts                 # Utility functions (random, history)
+│   ├── config.ts                # Configuration manager
+│   ├── cli-parser.ts            # Argument parser
+│   ├── exporter.ts              # File export utilities
+│   ├── interactive.ts           # Interactive mode
+│   ├── combination.ts           # Combination generator
+│   ├── data/                    # JSON data files
+│   │   ├── locations.json
+│   │   ├── situations.json
+│   │   ├── objectives.json
+│   │   ├── professions.json
+│   │   ├── personalities.json
+│   │   ├── quirks.json
+│   │   ├── secrets.json
+│   │   └── scenario-*.json
+│   └── generators/
+│       ├── BaseGenerator.ts     # Base generator class
+│       ├── scenePrompt.ts       # Scene generator
+│       ├── character.ts         # Character generator
+│       ├── scenario.ts          # Scenario generator
+│       └── comeback.ts          # Comeback generator
+├── dist/                        # Compiled JavaScript
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
-
-#### Generate a Punchline
-
-```bash
-npm run dev punchline "Why did the programmer quit?"
-```
-
-Example output:
-```
-═══ 💬 SETUP ═══
-
-"Why did the programmer quit?"
-
-═══ 🎯 PUNCHLINE ═══
-
-Because they believed in themselves (their first mistake)!
-```
-
-#### Generate Random Comedy Element
-
-```bash
-npm run dev random
-```
-
-#### Generate Everything at Once
-
-```bash
-npm run dev all
-```
-
-### Command Aliases
-
-- `scene` → `s`
-- `character` → `char`, `c`
-- `scenario` → `sc`
-- `comeback` → `cb`
-- `punchline` → `punch`, `p`
-- `random` → `r`
-- `all` → `a`
 
 ## 🎪 Use Cases
 
@@ -157,6 +240,7 @@ npm run dev all
 - **Theater Warm-ups**: Use as warm-up exercises for theater groups
 - **Creative Writing**: Break through writer's block with random comedy elements
 - **Social Media**: Generate funny content for social media posts
+- **D&D/RPG**: Create quirky NPCs and situations for tabletop games
 
 ## 🛠️ Development
 
@@ -171,31 +255,56 @@ npm run build
 npm start [command]
 ```
 
-## 📁 Project Structure
+## 🎨 Customization
 
+### Adding Your Own Content
+
+Edit the JSON files in `src/data/` to add your own comedy content:
+
+```bash
+# Add new locations
+vim src/data/locations.json
+
+# Add new character professions
+vim src/data/professions.json
 ```
-improv-comedy-generator/
-├── src/
-│   ├── index.ts                 # Main CLI interface
-│   ├── utils.ts                 # Utility functions
-│   └── generators/
-│       ├── scenePrompt.ts       # Scene prompt generator
-│       ├── character.ts         # Character generator
-│       ├── scenario.ts          # Scenario generator
-│       └── comeback.ts          # Comeback/punchline generator
-├── dist/                        # Compiled JavaScript
-├── package.json
-├── tsconfig.json
-└── README.md
+
+After editing, rebuild:
+```bash
+npm run build
+```
+
+### Creating Custom Generators
+
+Extend the `BaseGenerator` class:
+
+```typescript
+import { BaseGenerator } from './BaseGenerator.js';
+import { GeneratorOptions, GeneratorResult } from '../types.js';
+
+export class MyGenerator extends BaseGenerator<MyType> {
+  generate(options?: GeneratorOptions): GeneratorResult<MyType> {
+    // Your generation logic
+  }
+
+  format(data: MyType): string {
+    // Your formatting logic
+  }
+
+  getType(): string {
+    return 'my-generator';
+  }
+}
 ```
 
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
-- Add more comedy templates
+- Add more comedy templates to the data files
 - Improve the generators
 - Add new features
 - Fix bugs
+- Improve documentation
 
 ## 📝 License
 
@@ -204,3 +313,28 @@ MIT
 ## 🎉 Have Fun!
 
 This tool is designed to be silly, absurd, and fun. Don't take it too seriously—just enjoy the randomness and let your creativity flow!
+
+## 🔧 Troubleshooting
+
+### Data files not found
+Make sure you're running from the project directory and have built the project with `npm run build`.
+
+### TypeScript errors
+Run `npm install` to ensure all dependencies are installed, then `npm run build`.
+
+### Interactive mode not working
+Make sure your terminal supports readline. Most modern terminals do.
+
+## 🌟 What's New in v2.0
+
+- ✨ Complete architectural refactor with TypeScript classes
+- 📊 Batch generation with `--count` flag
+- 💾 Export to file, JSON, or minimal formats
+- 🎮 Interactive mode for guided generation
+- 🔄 No-repeat mode to avoid repetition
+- 📜 History tracking and viewing
+- ⚙️ Configuration file support
+- 🎨 Data separated into JSON files for easy customization
+- 🔧 Improved CLI with comprehensive options
+- 🎭 New combination generator for complete setups
+- 🐛 Fixed grammar issues in scenario generator
