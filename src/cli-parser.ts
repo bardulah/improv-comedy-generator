@@ -57,18 +57,46 @@ export function parseArgs(argv: string[]): ParsedArgs {
           parsed.flags.noRepeat = true;
           parsed.options.noRepeat = true;
           break;
-        case 'count':
-          parsed.options.count = parseInt(args[++i] || '1', 10);
+        case 'count': {
+          const countValue = args[++i];
+          if (!countValue) {
+            throw new Error('--count requires a value');
+          }
+          const count = parseInt(countValue, 10);
+          if (isNaN(count) || count < 1 || count > 100) {
+            throw new Error('--count must be a number between 1 and 100');
+          }
+          parsed.options.count = count;
           break;
-        case 'theme':
-          parsed.options.theme = args[++i];
+        }
+        case 'theme': {
+          const theme = args[++i];
+          if (!theme) {
+            throw new Error('--theme requires a value');
+          }
+          parsed.options.theme = theme;
           break;
-        case 'difficulty':
-          parsed.options.difficulty = parseInt(args[++i] || '5', 10);
+        }
+        case 'difficulty': {
+          const diffValue = args[++i];
+          if (!diffValue) {
+            throw new Error('--difficulty requires a value');
+          }
+          const difficulty = parseInt(diffValue, 10);
+          if (isNaN(difficulty) || difficulty < 1 || difficulty > 10) {
+            throw new Error('--difficulty must be a number between 1 and 10');
+          }
+          parsed.options.difficulty = difficulty;
           break;
-        case 'save':
-          parsed.flags.save = args[++i];
+        }
+        case 'save': {
+          const savePath = args[++i];
+          if (!savePath) {
+            throw new Error('--save requires a file path');
+          }
+          parsed.flags.save = savePath;
           break;
+        }
         case 'json':
           parsed.flags.json = true;
           break;
@@ -92,12 +120,26 @@ export function parseArgs(argv: string[]): ParsedArgs {
         case 'i':
           parsed.flags.interactive = true;
           break;
-        case 'c':
-          parsed.options.count = parseInt(args[++i] || '1', 10);
+        case 'c': {
+          const countValue = args[++i];
+          if (!countValue) {
+            throw new Error('-c requires a value');
+          }
+          const count = parseInt(countValue, 10);
+          if (isNaN(count) || count < 1 || count > 100) {
+            throw new Error('-c must be a number between 1 and 100');
+          }
+          parsed.options.count = count;
           break;
-        case 's':
-          parsed.flags.save = args[++i];
+        }
+        case 's': {
+          const savePath = args[++i];
+          if (!savePath) {
+            throw new Error('-s requires a file path');
+          }
+          parsed.flags.save = savePath;
           break;
+        }
         case 'j':
           parsed.flags.json = true;
           break;
