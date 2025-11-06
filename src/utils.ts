@@ -18,11 +18,35 @@ export function randomChoice<T>(array: T[]): T {
 }
 
 /**
- * Get multiple random choices from an array
+ * Get multiple random choices from an array using Fisher-Yates shuffle
+ * More efficient than sort-based shuffling: O(n) instead of O(n log n)
  */
 export function randomChoices<T>(array: T[], count: number): T[] {
   if (count > array.length) count = array.length;
-  const shuffled = [...array].sort(() => Math.random() - 0.5);
+  if (count === 0) return [];
+
+  const result: T[] = [];
+  const indices = new Set<number>();
+
+  // For small selections, use random sampling without shuffle
+  if (count <= array.length / 2) {
+    while (result.length < count) {
+      const index = Math.floor(Math.random() * array.length);
+      if (!indices.has(index)) {
+        indices.add(index);
+        result.push(array[index]);
+      }
+    }
+    return result;
+  }
+
+  // For large selections, use Fisher-Yates shuffle
+  const shuffled = [...array];
+  for (let i = 0; i < count; i++) {
+    const j = i + Math.floor(Math.random() * (shuffled.length - i));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
   return shuffled.slice(0, count);
 }
 
@@ -105,35 +129,4 @@ export function getHistory(type?: string): HistoryEntry[] {
 export function clearHistory(): void {
   history.length = 0;
   recentChoices.clear();
-}
-
-/**
- * Load data from JSON file
- */
-export async function loadData<T>(filename: string): Promise<T[]> {
-  try {
-    const path = new URL(`./data/${filename}`, import.meta.url);
-    const response = await fetch(path);
-    if (!response.ok) throw new Error(`Failed to load ${filename}`);
-    return (await response.json()) as T[];
-  } catch (error) {
-    console.error(`Error loading ${filename}:`, error);
-    return [];
-  }
-}
-
-/**
- * Load data synchronously (Node.js)
- */
-export function loadDataSync<T>(filename: string): T[] {
-  try {
-    const fs = require('fs');
-    const path = require('path');
-    const filePath = path.join(__dirname, 'data', filename);
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data) as T[];
-  } catch (error) {
-    console.error(`Error loading ${filename}:`, error);
-    return [];
-  }
 }
