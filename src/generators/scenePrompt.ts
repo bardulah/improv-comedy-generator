@@ -1,63 +1,42 @@
-import { randomChoice } from '../utils.js';
+import { BaseGenerator } from './BaseGenerator.js';
+import { ScenePrompt, GeneratorOptions, GeneratorResult } from '../types.js';
 
-const locations = [
-  'a hot air balloon',
-  'an abandoned amusement park',
-  'the bottom of the ocean',
-  'a cheese factory',
-  'the moon',
-  'a karaoke bar in space',
-  'a library that only has cookbooks',
-  'a haunted elevator',
-  'a petting zoo',
-  'a submarine sandwich shop on an actual submarine',
-  'a time machine repair shop',
-  'the world\'s worst museum',
-  'a yoga class for robots',
-  'an underwater post office',
-  'a retirement home for superheroes'
-];
+export class ScenePromptGenerator extends BaseGenerator<ScenePrompt> {
+  generate(options?: GeneratorOptions): GeneratorResult<ScenePrompt> {
+    const noRepeat = options?.noRepeat ?? false;
 
-const situations = [
-  'discovering that gravity has reversed',
-  'realizing you\'re all speaking different languages but can somehow understand each other',
-  'finding out the floor is lava (literally)',
-  'learning that everyone else is a time traveler except you',
-  'noticing that all the furniture is slowly shrinking',
-  'realizing you\'re stuck in a musical and must sing everything',
-  'discovering that you\'re all allergic to the same ridiculous thing',
-  'finding out you\'re characters in someone\'s dream',
-  'learning that objects keep disappearing when no one looks at them',
-  'realizing everything is upside down',
-  'discovering that you can only move in slow motion',
-  'finding out you\'re all secretly the same person',
-  'learning that you\'re being narrated by an unreliable narrator',
-  'realizing you\'re trapped in a loop',
-  'discovering that every word you say summons a tiny goblin'
-];
+    const location = this.getRandomItem('locations.json', noRepeat);
+    const situation = this.getRandomItem('situations.json', noRepeat);
+    const objective = this.getRandomItem('objectives.json', noRepeat);
 
-const objectives = [
-  'plan a surprise party',
-  'solve a mystery',
-  'start a business',
-  'save the world',
-  'order lunch',
-  'write a screenplay',
-  'audition for a talent show',
-  'train for the Olympics',
-  'organize a heist',
-  'conduct a scientific experiment',
-  'plan a wedding',
-  'teach a masterclass',
-  'host a game show',
-  'negotiate a peace treaty',
-  'break a world record'
-];
+    const data: ScenePrompt = {
+      location,
+      situation,
+      objective,
+      formatted: this.format({ location, situation, objective, formatted: '' })
+    };
 
+    return {
+      data,
+      formatted: data.formatted,
+      metadata: {
+        generatedAt: new Date(),
+        options: options || {}
+      }
+    };
+  }
+
+  format(data: ScenePrompt): string {
+    return `You are in ${data.location}, ${data.situation}. Your goal is to ${data.objective}.`;
+  }
+
+  getType(): string {
+    return 'scene';
+  }
+}
+
+// Legacy function for backward compatibility
 export function generateScenePrompt(): string {
-  const location = randomChoice(locations);
-  const situation = randomChoice(situations);
-  const objective = randomChoice(objectives);
-
-  return `You are in ${location}, ${situation}. Your goal is to ${objective}.`;
+  const generator = new ScenePromptGenerator();
+  return generator.generate().formatted;
 }
